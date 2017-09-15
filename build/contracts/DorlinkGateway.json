@@ -1,0 +1,91 @@
+{
+  "contract_name": "DorlinkGateway",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "alertType",
+          "type": "int256"
+        }
+      ],
+      "name": "alert",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "controlType",
+          "type": "int256"
+        }
+      ],
+      "name": "control",
+      "outputs": [],
+      "payable": false,
+      "type": "function"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "controlType",
+          "type": "int256"
+        }
+      ],
+      "name": "ControlEvent",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "alertType",
+          "type": "int256"
+        }
+      ],
+      "name": "AlertEvent",
+      "type": "event"
+    }
+  ],
+  "unlinked_binary": "0x6060604052341561000f57600080fd5b5b61010a8061001f6000396000f300606060405263ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416631074e68b811460465780639d832a5014605b575b600080fd5b3415605057600080fd5b60596004356070565b005b3415606557600080fd5b605960043560a7565b005b7fed6bd0b1c451b56c58772013d5d3ba8df775a5f21150b074560535b214cc34f58160405190815260200160405180910390a15b50565b7f19ea9a77d69008bb9b6a4be1331254bc196f6ce0a43e364dc1201b2f08614bfe8160405190815260200160405180910390a15b505600a165627a7a723058207c53699e1a93141dfb743f01f7f146429b2e7d312eec7f0ef36e36a91918f0dc0029",
+  "networks": {
+    "999": {
+      "events": {
+        "0x19ea9a77d69008bb9b6a4be1331254bc196f6ce0a43e364dc1201b2f08614bfe": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "controlType",
+              "type": "int256"
+            }
+          ],
+          "name": "ControlEvent",
+          "type": "event"
+        },
+        "0xed6bd0b1c451b56c58772013d5d3ba8df775a5f21150b074560535b214cc34f5": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "alertType",
+              "type": "int256"
+            }
+          ],
+          "name": "AlertEvent",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x657ce8349543f471b9827994a5636c14a54177ad",
+      "updated_at": 1505189998938
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1505189998938
+}
