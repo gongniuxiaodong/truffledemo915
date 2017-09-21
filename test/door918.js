@@ -5,10 +5,9 @@ let web3=new Web3()
 var fs=require('fs');
 const ethereumUri='http://192.168.0.198:8002';
 const gatewayip='http://192.168.0.134/api/devices/';
+const allDataip='http://192.168.0.134/api/interfaces';
 //const gatewayip='http://localhost/api/devices/';
 var gatewayBuf='';
-var contractBinaryBuf=null;
-var contractDoorlockBuf=null;
 var doorID=null;
 var binaryID=null;
 App = {
@@ -31,7 +30,7 @@ App = {
         // web3.eth.getAccounts(console.log)
     },
     getAlldata:function(){
-        http.get('http://192.168.0.134/api/interfaces',function (res) {
+        http.get(allDataip,function (res) {
             //console.log('getting data from gateway')
             console.time('get')
             var json='';
@@ -42,54 +41,80 @@ App = {
                 json=JSON.parse(json);
                 for(i=0;i<json.devices.length;i++){
                     if(json.devices[i].type=='com.switch.binary'){
-                        var  binaryValue=json.devices[i].properties.value;
-                        binaryID=json.devices[i].properties.id;
-                        if(contractBinaryBuf!=binaryValue){
-                            console.log('binary contract is set with '+binaryValue);
-                            contractBinaryBuf=binaryValue;
-                           /* switch (binaryValue)
-                            {
-                                case 0:
-                                    App.setContract(204);
-                                    break;
-                                case 1:
-                                    App.setContract(203);
-                                    break;
-                                default:
-                                    break;
-                            }*/
-                        }
+                        binaryID=json.devices[i].id;
+                     //   console.log(binaryID)
                     }
                     else if(json.devices[i].type=='com.switch.doorLock') {
-                        // console.log(json.devices[i].properties.value)
-                        var doorValue=json.devices[i].properties.value;
-                        // console.log(json.devices[i])
-                        // console.log(doorValue)
-                        if (contractDoorlockBuf !=doorValue ) {
-                            contractDoorlockBuf =doorValue;
-                            console.log('doorlock contract is set with '+doorValue);
-                            console.timeEnd('t')
-                          //  console.timeEnd('re')
-                          /*  if (doorValue) {
-                                App.setContract(202);
-                            }else{
-                                App.setContract(201);
-
-                            }*/
-
-                        }
-
+                        doorID=json.devices[i].id;
+                       // console.log(doorID)
                     }
                 }
             });
-           console.timeEnd('get')
+            console.timeEnd('get')
         }).on('error',function (e) {
             console.error(e);
             console.log('none is getting back')
         });
     },
+    getChanges:function(){
+        var last=fs.readFileSync('./last').toString().substr(5)
+        http.get('http://192.168.0.134/api/refreshStates?last='+last,function (res) {
+            //console.log('getting data from gateway')
+            console.time('get')
+            var json='';
+            res.on('data',function (d) {
+                json+=d;
+            });
+            res.on('end',function () {
+                json=JSON.parse(json);
+                if(json.last==last){
+                    ;
+                }
+                else {
+                    last=json.last;
+                    var data='last='+last;
+                    fs.writeFileSync('./last',data)
+                    //var value=json.changes.value+'';
+                    for(i=0;i<json.changes.length;i++)
+                    {
+                        if(json.changes[i].id==binaryID)
+                        {
+                            console.log('binary changing')
+                            var  binaryValue=json.changes[i].value;
+                             switch (binaryValue)
+                             {
+                                 case 0:
+                                     App.setContract(204);
+                                     break;
+                                 case 1:
+                                     App.setContract(203);
+                                     break;
+                                 default:
+                                     break;
+                             }
+                        }
+                        else if(json.changes[i].id=doorID){
+                            console.log('door changing')
+                            var  doorValue=json.changes[i].value;
+                              if (doorValue) {
+                                  App.setContract(202);
+                              }else{
+                                  App.setContract(201);
+
+                              }
+                        }
+                    }
+                }
+            });
+            // console.timeEnd('get')
+        }).on('error',function (e) {
+            console.error(e);
+            console.log('none is getting back')
+        });
+    },
+
     readContract: function() {
-      //  console.time('re')
+        //  console.time('re')
         var contractEvent=App.contracts.contractInstance.ControlEvent({fromBlock:'latest',toBlock:0});
         // console.log("start")
         contractEvent.watch(function(err, result) {
@@ -104,7 +129,7 @@ App = {
                     gatewayBuf=""+result.args.controlType;
                     App.setGateway("" + result.args.controlType);
                     console.timeEnd('re')
-                 //   console.log(result);
+                    //   console.log(result);
                 }
                 else {console.log('set same gateway')}
             }
@@ -114,28 +139,30 @@ App = {
     setContract:function (controlType) {
         var instance=App.contracts.contractInstance;
         var account=web3.eth.accounts[0];
-       // web3.personal.unlockAccount(account,'ubunt').then(
-       // App.unlockaccount().then(
-            instance.alert.sendTransaction(controlType,{from:account});//);
-            //;//)
+      //  web3.personal.unlockAccount(account,'ubunt',24*60*60);//
+     //   web3.personal.unlockAccount(account,'ubunt').then(
+        instance.alert.sendTransaction(controlType,{from:account});//.on('error',console.error);//);
+        //;//)
 
     },
     setGateway:function (controlType) {
         switch(controlType){
             case "102":
-              //  http.get(gatewayip+'8/action/secure');
+                http.get(gatewayip+doorID+'/action/secure');
+              //  console.log(gatewayip+doorID+'/action/secure')
                 console.log('door is lock')
                 break;
             case "101":
-             //   http.get(gatewayip+'8/action/unsecure');
+                http.get(gatewayip+doorID+'/action/unsecure');
+              //  console.log(gatewayip+doorID+'/action/unsecure')
                 console.log('door is unlock')
                 break;
             case "104":
-                http.get(gatewayip+'3/action/turnOff');
+                http.get(gatewayip+binaryID+'/action/turnOff');
                 console.log('light is off')
                 break;
             case "103":
-                http.get(gatewayip+'3/action/turnOn');
+                http.get(gatewayip+binaryID+'/action/turnOn');
                 console.log('light is on')
                 break;
             default:
@@ -143,10 +170,7 @@ App = {
         }
     },
     unlockaccount:function () {
-        return new Promise(function(resolve,reject){
             web3.personal.unlockAccount(web3.eth.accounts[0],'ubunt',24*60*60);
-        });
-
     }
 }
 // Promise.all([App.initWeb3(),App.initContract()]).then(()=>{
@@ -154,8 +178,10 @@ App = {
 // })
 App.initWeb3();
 App.initContract();
+App.unlockaccount();
+App.getAlldata();
 // App.unlockaccount();
 console.time('t')
- setInterval(App.getAlldata,1000);
 App.readContract();
-//console.timeEnd('t')
+setInterval(App.getChanges,1000);
+console.timeEnd('t')
