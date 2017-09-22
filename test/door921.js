@@ -2,17 +2,18 @@ var http=require('http');
 const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs');
-const topic='0x00200000';
-const symkeyID='7184f54d021653cfca92318ff68746233dadad7dcf9dc61276ea8d044584f3d7';
-const mesFilter='d33d5f11429961be80167ee5297efb42c5852226e815f3bddc417b0066ddca9f';
+const controlTopic='0x00200000';
+const alertTopic='0x00100000';
 const ethereumUri='http://192.168.0.198:8002';
 const gatewayip='http://192.168.0.134/api/devices/';
 const allDataip='http://192.168.0.134/api/interfaces';
+const changesip='http://192.168.0.134/api/refreshStates?last=';
 // const allDataip='http://localhost/api/interfaces';
 // const gatewayip='http://localhost/api/devices/';
 var gatewayBuf='';
 var doorID=null;
 var binaryID=null;
+var symkeyID,symkey,docasyid,controlMesFilter,alertMesFilter,pubKey;
 App = {
     // web3Provider: null,
     contracts: {},
@@ -23,10 +24,22 @@ App = {
             throw new Error('unable to connect to ethereum node at ' + ethereumUri);
         }else{
             console.log('web3 is connected');
-            var account=web3.eth.accounts[0];
-            web3.personal.unlockAccount(account,'ubunt');
-            console.log('web3 account was unlock')
+            // var account=web3.eth.accounts[0];
+            // web3.personal.unlockAccount(account,'ubunt');
+            // console.log('web3 account was unlock')
         }
+        symkeyID=web3.shh.generateSymKeyFromPassword('ubunt');//console.log(symkeyID)
+        symkey=web3.shh.getSymKey(symkeyID);//console.log(symkey);//console.log('symkey length is:  '+symkey.length);
+        docasyid=web3.shh.addPrivateKey(symkey);
+        pubKey=web3.shh.getPublicKey(docasyid);
+        controlMesFilter=web3.shh.newMessageFilter({
+            privateKeyID:docasyid,
+            topic:controlTopic,
+        });
+        // alertMesFilter=web3.shh.newMessageFilter({
+        //     privateKeyID:docasyid,
+        //     topic:alertTopic,
+        // });
     },
     getAlldata:function(){
         http.get(allDataip,function (res) {
@@ -57,7 +70,7 @@ App = {
     },
     getChanges:function(){
         var last=fs.readFileSync('./last').toString().substr(5)
-        http.get('http://192.168.0.134/api/refreshStates?last='+last,function (res) {
+        http.get(changesip+last,function (res) {
             //console.log('getting data from gateway')
             console.time('get')
             var json='';
@@ -83,10 +96,10 @@ App = {
                             switch (binaryValue)
                             {
                                 case 0:
-                                    // App.whisperSend(204);
+                                    App.whisperSend(204);
                                     break;
                                 case 1:
-                                    // App.whisperSend(203);
+                                    App.whisperSend(203);
                                     break;
                                 default:
                                     break;
@@ -96,9 +109,9 @@ App = {
                             console.log('door changing')
                             var  doorValue=json.changes[i].value;
                             if (doorValue) {
-                                // App.whisperSend(202);
+                                App.whisperSend(202);
                             }else{
-                                // App.whisperSend(201);
+                                App.whisperSend(201);
 
                             }
                         }
@@ -113,33 +126,35 @@ App = {
     },
 
     whisperReceive: function() {
-        web3.shh.getFilterMessages(mesFilter,function (e,r) {
+        web3.shh.getFilterMessages(controlMesFilter,function (e,r) {
             if(e){console.log(e)}
             else{
-                console.log(r)
-                if(r[r.length-1]!=null) {
-                     console.log(r[r.length-1].payload)//.payload)
+                // console.log(r)
+                if((r[r.length-1]!=null)&&(r[r.length-1].topic==controlTopic)) {
+                    console.log(r[r.length-1].payload)//.payload)
                     var controlType=r[r.length-1].payload.substring(7);
                     App.setGateway(controlType);
                 }
             }
         })
     },
-    whisperSend:function (controlType) {
+    whisperSend:function (alertType) {
+        alertType='0x00000'+alertType;
         web3.shh.post({
             // pubKey:publicKey,
-            symKeyID:symkeyID,
+            pubKey:pubKey,
+            // symKeyID:symkeyID,
             ttl:5 ,
-            payload:'0x10000abb',
-            topic:topic,
+            payload:alertType,
+            topic:alertTopic,
             powTarget:2.5,
             powTime:2},function (e,r) {
             // web3.shh.post({symKeyID:symkeyID,sig:asykeyID,ttl:50 ,payload:'0x00000201',topic:topic, powTarget:2.5,powTime:2},function (e,r) {
-            if(e){console.log('error happen')
-                console.log(e)
+            if(e){
+                console.log('error happen in whisperSend is '+e)
             }
             else{
-                console.log(r)
+                console.log('whisperSend result is '+r)
             }
         });
     },
@@ -174,5 +189,6 @@ App = {
 App.initWeb3();
 App.getAlldata();
 console.time('t')
-setInterval(App.whisperReceive,1000);
+// setInterval(App.getChanges,1000)
+setInterval(App.whisperReceive,1000);setInterval(App.getChanges,1000);
 console.timeEnd('t')

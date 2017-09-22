@@ -1,7 +1,7 @@
 const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs')
-var topic='0x11222222';
+var controlTopic='0x00200000';
 const ethereumUri='http://192.168.0.198:8002';
 web3.setProvider(new web3.providers.HttpProvider(ethereumUri));
 if(!web3.isConnected()){
@@ -9,14 +9,19 @@ if(!web3.isConnected()){
 }else{
     console.log('web3 is connected');
 }
-const symkeyID='7184f54d021653cfca92318ff68746233dadad7dcf9dc61276ea8d044584f3d7';
+var symkeyID2=web3.shh.generateSymKeyFromPassword('ubunt');console.log(symkeyID2)
+var symkey2=web3.shh.getSymKey(symkeyID2);console.log(symkey2);
+// const symkeyID='a45dc049fe33d0f53025fb89dc67dff9c839e442575a7ce3c1d78670da35f5a2';
+// const docprikey='0xe545d1e6580c7b99167a01d9d58dcdd5b389d295f323abf4339f7226db147461';
+var docasyid=web3.shh.addPrivateKey(symkey2);
+var pubKey=web3.shh.getPublicKey(docasyid);
 function sendWithsymkey() {
     web3.shh.post({
-        // pubKey:publicKey,
-        symKeyID:symkeyID,
-        ttl:5 ,
-        payload:'0x10000102',
-        topic:topic,
+        pubKey:pubKey,
+        // symKeyID:symkeyID,
+        ttl:5,
+        payload:'0x10000104',
+        topic:controlTopic,
         powTarget:2.5,
         powTime:2},function (e,r) {
         // web3.shh.post({symKeyID:symkeyID,sig:asykeyID,ttl:50 ,payload:'0x00000201',topic:topic, powTarget:2.5,powTime:2},function (e,r) {
