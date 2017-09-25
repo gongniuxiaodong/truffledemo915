@@ -1,7 +1,7 @@
 const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs')
-var controlTopic='0x00200000';
+var controlTopic='0x00100000';
 const ethereumUri='http://192.168.0.198:8002';
 web3.setProvider(new web3.providers.HttpProvider(ethereumUri));
 if(!web3.isConnected()){

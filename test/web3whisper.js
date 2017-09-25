@@ -4,17 +4,22 @@ let web3=new Web3();
 const ethereumUri='http://192.168.0.198:8002';
 var topic='0x00200000';
 var alertTopic='0x00100000'
-var symkeyID,symkey,docasyid,controlMesFilter,alertMesFilter,pubKey;
+var symkeyID,symkey,docasyid,alertMesFilter,pubKey;
 var accounts0,accounts1;
 web3.setProvider(new web3.providers.HttpProvider(ethereumUri));
 if(!web3.isConnected()){
     throw new Error('unable to connect to ethereum node at ' + ethereumUri);
 }else{
     console.log('web3 is connected');
-    // console.log('accounts address is : '+web3.eth.accounts[0])
-    // console.log('accounts length is :  '+web3.eth.accounts[0].length)
-    // accounts0=web3.eth.accounts[0];
-    // accounts1=web3.eth.accounts[1];
+    symkeyID=web3.shh.generateSymKeyFromPassword('ubunt');//console.log(symkeyID)
+    symkey=web3.shh.getSymKey(symkeyID);//console.log(symkey);//console.log('symkey length is:  '+symkey.length);
+    docasyid=web3.shh.addPrivateKey(symkey);
+    pubKey=web3.shh.getPublicKey(docasyid);
+    alertMesFilter=web3.shh.newMessageFilter({
+        privateKeyID:docasyid,
+        topic:alertTopic,
+    });
+
 }
 // var symkeyID=web3.shh.newSymKey();console.log(symkeyID);//console.log('symkeyID.length is : '+symkeyID.length)
 // var asykeyID = web3.shh.newKeyPair();console.log(asykeyID);//console.log('asykeyID.length is : '+asykeyID.length);
@@ -41,13 +46,7 @@ if(!web3.isConnected()){
 // const mesFilter='d33d5f11429961be80167ee5297efb42c5852226e815f3bddc417b0066ddca9f';
 
 
-symkeyID=web3.shh.generateSymKeyFromPassword('ubunt');//console.log(symkeyID)
-symkey=web3.shh.getSymKey(symkeyID);//console.log(symkey);//console.log('symkey length is:  '+symkey.length);
-docasyid=web3.shh.addPrivateKey(symkey);
-alertMesFilter=web3.shh.newMessageFilter({
-    privateKeyID:docasyid,
-    topic:alertTopic,
-});
+
 
 function read() {
     // var symkeyID=web3.shh.generateSymKeyFromPassword('ubunt');console.log(symkeyID)
@@ -68,10 +67,10 @@ function read() {
             if((r[r.length-1]!=null)&&(r[r.length-1].topic==alertTopic)) {
                 console.log(r[r.length - 1].payload.substring(7))//.payload)
             }
-            // web3.shh.deleteMessageFilter(mesFilter,function (e,r) {
-            //     if(e){console.log(e);console.log('error happen in deleteMessageFilter')}
-            //     else{console.log(r)}
-            // });
+            /*eb3.shh.deleteMessageFilter(alertMesFilter,function (e,r) {
+                if(e){console.log(e);console.log('error happen in deleteMessageFilter')}
+                else{console.log(r)}
+            });*/
         }
      });
 
