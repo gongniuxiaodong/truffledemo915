@@ -2,7 +2,7 @@ const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs');
 const ethereumUri='http://192.168.0.198:8002';
-var account,account1;
+var account,account1,account2,account3;
 App = {
     // web3Provider: null,
     contracts: {},
@@ -15,9 +15,11 @@ App = {
             console.log('web3 is connected');
             account=web3.eth.accounts[0];
             account1=web3.eth.accounts[1];
-            web3.eth.defaultAccount=account1;
+            account2=web3.eth.accounts[2];
+            account3=web3.eth.accounts[3];
+            // web3.eth.defaultAccount=account1;
             // var le='0xa4b48f34468114c4f694fc4e1f5dd54281b69bbf';
-            console.log(account1.length)
+            // console.log(account1.length)
             // web3.personal.unlockAccount(account,'ubunt');
         }
     },
@@ -30,7 +32,16 @@ App = {
     },
     rentHouse:function () {
         var contract=App.contracts.contractInstance;
-        contract.rentHouse.sendTransaction(account1,10,'abc',{from:account1,to:account},function (e,r) {
+        web3.personal.unlockAccount(account3,'ubunt');
+        contract.rentHouse.sendTransaction(account,'abc',{from:account3,value:200,gas:3000000},function (e,r) {
+            if(e){console.log(e)}
+            else{console.log(r)}
+        })
+    },
+    publish:function () {
+        var contract=App.contracts.contractInstance;
+        web3.personal.unlockAccount(account,'ubunt');
+        contract.publishHouse.sendTransaction(200,'abc','abc',{from:account,gas:3000000},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         })
@@ -42,18 +53,20 @@ App = {
         //     if(e){console.log(e)}
         //     else{console.log(r)}
         // })
-        var key=contract.getKey.call(account1,'abcd');
+
+        var key=contract.getKey.call(account3,'abc');
         if(key!=''){
             console.log('key is: '+key)
         }else{
             console.log('key is null')
         }
-    }
-
+    },
 }
 
 App.initWeb3();
 //
 App.initContract();
-// App.rentHouse();
-App.getKey();
+// App.publish();
+App.rentHouse();
+// App.getKey();
+
