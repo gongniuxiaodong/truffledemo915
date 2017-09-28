@@ -33,10 +33,13 @@ App = {
     rentHouse:function () {
         var contract=App.contracts.contractInstance;
         web3.personal.unlockAccount(account3,'ubunt');
-        contract.rentHouse.sendTransaction(account,'abc',{from:account3,value:200,gas:3000000},function (e,r) {
+        contract.rentHouse.sendTransaction(account,'abc',{from:account3,value:200,gas:300000},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         })
+        // web3.miner.start();
+        setTimeout(web3.miner.stop,5000)
+
     },
     publish:function () {
         var contract=App.contracts.contractInstance;
