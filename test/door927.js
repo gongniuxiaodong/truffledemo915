@@ -2,7 +2,7 @@ const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs');
 const ethereumUri='http://192.168.0.198:8002';
-var account,account1,account2,account3;
+var account,account1,account2,account3,account4;
 App = {
     // web3Provider: null,
     contracts: {},
@@ -17,7 +17,8 @@ App = {
             account1=web3.eth.accounts[1];
             account2=web3.eth.accounts[2];
             account3=web3.eth.accounts[3];
-            // web3.eth.defaultAccount=account1;
+            account4=web3.eth.accounts[4];
+            web3.eth.defaultAccount=account;
             // var le='0xa4b48f34468114c4f694fc4e1f5dd54281b69bbf';
             // console.log(account1.length)
             // web3.personal.unlockAccount(account,'ubunt');
@@ -33,13 +34,29 @@ App = {
     rentHouse:function () {
         var contract=App.contracts.contractInstance;
         web3.personal.unlockAccount(account3,'ubunt');
+        var ba = web3.eth.getBalance(account3);console.log(ba)
         contract.rentHouse.sendTransaction(account,'abc',{from:account3,value:200,gas:300000},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         })
         // web3.miner.start();
-        setTimeout(web3.miner.stop,5000)
+        // setTimeout(web3.miner.stop,5000)
 
+    },
+    reset:function () {
+        var contract=App.contracts.contractInstance;
+        contract.resetRenter.sendTransaction({from:account},function (e,r) {
+            if(e){console.log(e)}
+            else{console.log(r)}
+        });
+        // web3.miner.start();
+        // setTimeout(web3.miner.stop,5000);
+        // contract.resetHouse.sendTransaction(account,{from:account},function (e,r) {
+        //     if(e){console.log(e)}
+        //     else{console.log(r)}
+        // })
+        // web3.miner.start();
+        // setTimeout(web3.miner.stop,5000);
     },
     publish:function () {
         var contract=App.contracts.contractInstance;
@@ -69,7 +86,9 @@ App = {
 App.initWeb3();
 //
 App.initContract();
+
+// App.reset();
 // App.publish();
-App.rentHouse();
-// App.getKey();
+// App.rentHouse();
+App.getKey();
 
