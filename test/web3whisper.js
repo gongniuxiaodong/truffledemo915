@@ -2,8 +2,8 @@ var Web3=require('web3')
 // var provider=require('web3-providers-http')
 let web3=new Web3();
 const ethereumUri='http://192.168.0.198:8002';
-var topic='0x00200000';
-var alertTopic='0x00100000'
+var topic='0x00100000';
+var alertTopic='0x00200000'
 var symkeyID,symkey,docasyid,alertMesFilter,pubKey;
 var accounts0,accounts1;
 web3.setProvider(new web3.providers.HttpProvider(ethereumUri));
@@ -63,7 +63,8 @@ function read() {
     web3.shh.getFilterMessages(alertMesFilter,function (e,r) {
         if(e){console.log(e)}
         else{
-            // console.log(r)
+            console.log(r)
+            console.log('messages incoming')
             if((r[r.length-1]!=null)&&(r[r.length-1].topic==alertTopic)) {
                 console.log(r[r.length - 1].payload.substring(7))//.payload)
             }

@@ -13,12 +13,12 @@ App = {
             throw new Error('unable to connect to ethereum node at ' + ethereumUri);
         }else{
             console.log('web3 is connected');
-            account=web3.eth.accounts[0];
+            /*account=web3.eth.accounts[0];
             account1=web3.eth.accounts[1];
             account2=web3.eth.accounts[2];
             account3=web3.eth.accounts[3];
             account4=web3.eth.accounts[4];
-            web3.eth.defaultAccount=account;
+            web3.eth.defaultAccount=account;*/
             // var le='0xa4b48f34468114c4f694fc4e1f5dd54281b69bbf';
             // console.log(account1.length)
             // web3.personal.unlockAccount(account,'ubunt');
@@ -31,11 +31,11 @@ App = {
         App.contracts.contractInstance=web3.eth.contract(contractAbi).at(contractAddr);
         console.log('contract initialize successfully')
     },
-    rentHouse:function () {
+    rentHouse:function (fromAccount, toAccount, getKeyPassword, unlockPassword, amount) {
         var contract=App.contracts.contractInstance;
-        web3.personal.unlockAccount(account3,'ubunt');
-        var ba = web3.eth.getBalance(account3);console.log(ba)
-        contract.rentHouse.sendTransaction(account,'abc',{from:account3,value:200,gas:300000},function (e,r) {
+        web3.personal.unlockAccount(fromAccount,unlockPassword);
+        var ba = web3.eth.getBalance(fromAccount);console.log(ba)
+        contract.rentHouse.sendTransaction(toAccount, getKeyPassword,{from:fromAccount,value:amount,gas:300000},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         })
@@ -43,9 +43,9 @@ App = {
         // setTimeout(web3.miner.stop,5000)
 
     },
-    reset:function () {
+    reset:function (fromAccount) {
         var contract=App.contracts.contractInstance;
-        contract.resetRenter.sendTransaction({from:account},function (e,r) {
+        contract.resetRenter.sendTransaction({from:fromAccount},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         });
@@ -58,15 +58,15 @@ App = {
         // web3.miner.start();
         // setTimeout(web3.miner.stop,5000);
     },
-    publish:function () {
+    publish:function (fromAccount, houseKey, getKeyPassword, unlockPassword) {
         var contract=App.contracts.contractInstance;
-        web3.personal.unlockAccount(account,'ubunt');
-        contract.publishHouse.sendTransaction(200,'abc','abc',{from:account,gas:3000000},function (e,r) {
+        web3.personal.unlockAccount(fromAccount,unlockPassword);
+        contract.publishHouse.sendTransaction(200,getKeyPassword,houseKey,{from:fromAccount,gas:3000000},function (e,r) {
             if(e){console.log(e)}
             else{console.log(r)}
         })
     },
-    getKey: function() {
+    getKey: function(fromAccount, getKeyPassword) {
 
         var contract=App.contracts.contractInstance;
         // contract.rentHouse.sendTransaction(account1,10,'abcd',{from:account1,to:account},function (e,r) {
@@ -74,8 +74,8 @@ App = {
         //     else{console.log(r)}
         // })
 
-        var key=contract.getKey.call(account3,'abc');
-        if(key!=''){
+        var key=contract.getKey.call(fromAccount,getKeyPassword);
+        if((key!='')&&(key!='false')){
             console.log('key is: '+key)
         }else{
             console.log('key is null')
@@ -83,12 +83,19 @@ App = {
     },
 }
 
+
 App.initWeb3();
-//
+account=web3.eth.accounts[0];
+account1=web3.eth.accounts[1];
+account2=web3.eth.accounts[2];
+account3=web3.eth.accounts[3];
+account4=web3.eth.accounts[4];
+web3.eth.defaultAccount=account;
 App.initContract();
-
+// var contract=App.contracts.contractInstance
+// console.log(contract.getInfo.call())
 // App.reset();
-// App.publish();
-// App.rentHouse();
-App.getKey();
-
+// App.publish(account, 'ubunt','abc', 'ubunt');
+// App.rentHouse(account2, account, 'abcde', 'ubunt',200);
+App.getKey(account3,'abcde');
+//

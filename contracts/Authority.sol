@@ -16,10 +16,10 @@ contract Authority {
         address owner;
         uint housePrice;
     }
-    struct doorlock{
+/*    struct doorlock{
         Renter[] renters;
         House[]  houses;
-    }
+    }*/
 
     event FallbackCalled(bytes data);
     function(){ FallbackCalled(msg.data);  }
@@ -33,9 +33,23 @@ contract Authority {
     /*    event CheckRenter(address renter, string pass, bool r);
         event GetKey(address renter, string accKey, string houseKey, bool r);*/
 
-    /*        function getInfo()returns(Renter[] r){
-                return renters;
-            }*/
+    function getInfo()returns(address[], uint[], address[], bool[]){
+        House[] memory housetemp = houses;//address[], bool[],
+        Renter[] memory rentertemp = renters;
+        address[] memory houseowner; address[] memory rentername;
+        bool[] memory isRenter;uint[] memory houseprice;
+
+        for(uint i = 0; i < housetemp.length; i++){
+            houseowner[i] = housetemp[i].owner;
+            houseprice[i] = housetemp[i].housePrice;
+        }
+        for(uint j = 0; j < rentertemp.length; j++){
+            rentername[j] = rentertemp[j].renterName;
+            isRenter[j] = rentertemp[j].isRenter;
+        }
+        return (houseowner, houseprice, rentername, isRenter);
+    }
+
     function payRent(address b)private returns(bool result){
         bool isPay = b.send(this.balance);
         return isPay;
@@ -72,6 +86,9 @@ contract Authority {
                             // RentHouse(msg.sender, to, msg.value, message, length);
                             if(isPay)
                             message = "pay successfully";
+                            else{
+                                message = "pay fail";
+                            }
                         }else{
                             message = 'please pay correctly';
                             // RentHouse(msg.sender, to, msg.value, m2, length);

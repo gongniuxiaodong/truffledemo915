@@ -2,8 +2,8 @@ var http=require('http');
 const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs');
-const controlTopic='0x00200000';
-const alertTopic='0x00100000';
+const controlTopic='0x00100000';
+const alertTopic='0x00200000';
 const ethereumUri='http://192.168.0.198:8002';
 const gatewayip='http://192.168.0.134/api/devices/';
 const allDataip='http://192.168.0.134/api/interfaces';
@@ -192,3 +192,4 @@ console.time('t')
 // setInterval(App.getChanges,1000)
 setInterval(App.whisperReceive,1000);setInterval(App.getChanges,1000);
 console.timeEnd('t')
+// http.get(gatewayip+3+'/action/turnOff');
