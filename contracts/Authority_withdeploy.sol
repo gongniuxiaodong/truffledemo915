@@ -1,6 +1,6 @@
 pragma solidity ^0.4.0;
 
-
+import  "./Authority.sol" as at
 contract getTime{
     uint time = 1507619435 seconds;
     struct Renter {
