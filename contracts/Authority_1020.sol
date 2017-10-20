@@ -1,17 +1,13 @@
-/*
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.15;
 
-import  "./Authority.sol" as at
-contract getTime{
-    uint time = 1507619435 seconds;
+
+contract Authority_1020 {
+
     struct Renter {
     string  houseKey;
     address renterName;
     string accountKey;
     bool isRenter;
-    uint startTime;
-    uint rentDay;
-    uint endTime;
     }
 
     struct House{
@@ -20,49 +16,39 @@ contract getTime{
     address owner;
     uint housePrice;
     }
-    */
-/*    struct doorlock{
+    /*    struct doorlock{
             Renter[] renters;
             House[]  houses;
-        }*//*
-
+        }*/
 
     event FallbackCalled(bytes data);
     function(){ FallbackCalled(msg.data);  }
 
     Renter[] renters;
-    House[]  public houses;
+    House[]  houses;
 
-    // event RentHouse(address from,address to,uint amount, string result,uint length);
+    event RentHouse(address from,address to,uint amount, string result,uint length);
     event PublishHouse(address owner, uint houPri, string houseKey, string accKey,uint length);
     event rentersChange(address renter, bool isRenter, string accKey, string houseKey, uint length);
-    */
-/*    event CheckRenter(address renter, string pass, bool r);
-        event GetKey(address renter, string accKey, string houseKey, bool r);*//*
+    /*    event CheckRenter(address renter, string pass, bool r);
+        event GetKey(address renter, string accKey, string houseKey, bool r);*/
 
+    // function getInfo()returns(address[], uint[], address[], bool[]){
+    //     House[] memory housetemp = houses;//address[], bool[],
+    //     Renter[] memory rentertemp = renters;
+    //     address[] memory houseowner; address[] memory rentername;
+    //     bool[] memory isRenter;uint[] memory houseprice;
 
-    function timeCheck(uint nowTime)returns(string){
-        if(nowTime  > time)
-        return "it's passing the deadline";
-        else{return "it's before the deadline";}
-    }
-
-    function getInfo()returns(address[], uint[], address[], bool[]){
-        House[] memory housetemp = houses;//address[], bool[],
-        Renter[] memory rentertemp = renters;
-        address[] memory houseowner; address[] memory rentername;
-        bool[] memory isRenter;uint[] memory houseprice;
-
-        for(uint i = 0; i < housetemp.length; i++){
-            houseowner[i] = housetemp[i].owner;
-            houseprice[i] = housetemp[i].housePrice;
-        }
-        for(uint j = 0; j < rentertemp.length; j++){
-            rentername[j] = rentertemp[j].renterName;
-            isRenter[j] = rentertemp[j].isRenter;
-        }
-        return (houseowner, houseprice, rentername, isRenter);
-    }
+    //     for(uint i = 0; i < housetemp.length; i++){
+    //         houseowner[i] = housetemp[i].owner;
+    //         houseprice[i] = housetemp[i].housePrice;
+    //     }
+    //     for(uint j = 0; j < rentertemp.length; j++){
+    //         rentername[j] = rentertemp[j].renterName;
+    //         isRenter[j] = rentertemp[j].isRenter;
+    //     }
+    //     return (houseowner, houseprice, rentername, isRenter);
+    // }
 
     function payRent(address b)private returns(bool result){
         bool isPay = b.send(this.balance);
@@ -85,7 +71,7 @@ contract getTime{
         PublishHouse(msg.sender, houPri, houKey, accKey, length);
     }
 
-    function rentHouse(address to, string accKey )payable returns(string result){
+    function rentHouse(address to, string accKey)payable returns(string result){
         House[] memory temp = houses;
         string memory message = '';
         if(temp.length != 0){
@@ -93,7 +79,7 @@ contract getTime{
                 if(temp[i].owner == to){
                     if(msg.sender.balance > msg.value){
                         if(msg.value == temp[i].housePrice){
-                            addRenter(msg.sender, accKey, temp[i].owner, now);
+                            addRenter(msg.sender, accKey, temp[i].owner);
                             uint length = temp.length;
                             bool isPay = payRent(temp[i].owner);
                             // message = "pay successfully";
@@ -127,11 +113,11 @@ contract getTime{
             // RentHouse(msg.sender, to, msg.value, m5, length);
             msg.sender.transfer(msg.value);//return m5;
         }
-        // RentHouse(msg.sender, to, msg.value, message, length);
+        RentHouse(msg.sender, to, msg.value, message, length);
         return message;
     }
 
-    function addRenter(address renter, string accKey, address house, uint rentday)internal returns(Renter[] tempre){
+    function addRenter(address renter, string accKey, address house)internal returns(Renter[] tempre){
         House[] memory temp = houses;
         for(uint i=0;i<temp.length;i++){
             if(temp[i].owner == house){
@@ -140,10 +126,7 @@ contract getTime{
                 renterName: renter,
                 isRenter: true,
                 houseKey: temp[i].houseKey,
-                accountKey: accKey,
-                startTime: now,
-                rentDay: rentday,
-                endTime: now + rentday * 3600 *24
+                accountKey: accKey
                 }));
                 rentersChange(renter, true, temp[i].houseKey, accKey, renters.length);
             }
@@ -151,17 +134,15 @@ contract getTime{
         return renters;
     }
 
-    */
-/*    function print()returns(doorlock){
+    /*    function print()returns(doorlock){
             doorlock memory temp;
             temp.renters = renters;
             temp.houses = houses;
             return temp;
-        }*//*
+        }*/
 
 
-
-    function checkRenter(address renter, string passwd)returns (string) {
+    function checkRenter(address renter, string passwd)private returns (string) {
         Renter[] memory temp = renters;
         string memory r='false';
         for(uint i=0;i<temp.length;i++){
@@ -194,6 +175,17 @@ contract getTime{
         return 'reset successfully';
     }
 
+    function deleteRenter(address addr){
+        for(uint i=0; i< renters.length; i++){
+            if(renters[i].renterName == addr){
+                renters[i].renterName = 0;
+                renters[i].houseKey = '';
+                renters[i].accountKey = '';
+                renters[i].isRenter = false;
+            }
+        }
+    }
+
     function getContractAdd()returns (address addr){
         return this;
     }
@@ -205,9 +197,7 @@ contract getTime{
         if(compareString(isRenter, 'true')){
             for(uint i=0;i<temp.length;i++){
                 if(temp[i].renterName==renter){
-                    */
-/*  GetKey(renter, passwd, temp[i].houseKey, isRenter);*//*
-
+                    /*  GetKey(renter, passwd, temp[i].houseKey, isRenter);*/
                     return renters[i].houseKey;
                 }
             }
@@ -233,5 +223,5 @@ contract getTime{
             return false;
         }
     }
+}
 
-}*/
