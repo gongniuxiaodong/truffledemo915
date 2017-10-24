@@ -1,7 +1,8 @@
 var Web3=require('web3')
 // var provider=require('web3-providers-http')
 let web3=new Web3();
-const ethereumUri='http://192.168.0.198:8002';
+// const ethereumUri='http://192.168.0.198:8002';
+const ethereumUri='http://192.168.0.49:8003';
 var topic='0x00100000';
 var alertTopic='0x00200000'
 var symkeyID,symkey,docasyid,alertMesFilter,pubKey;

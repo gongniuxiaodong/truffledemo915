@@ -2,7 +2,8 @@ const Web3=require('web3')
 let web3=new Web3()
 var fs=require('fs')
 var controlTopic='0x00100000';
-const ethereumUri='http://192.168.0.198:8002';
+// const ethereumUri='http://192.168.0.198:8002';
+const ethereumUri='http://192.168.0.49:8003';
 web3.setProvider(new web3.providers.HttpProvider(ethereumUri));
 if(!web3.isConnected()){
     throw new Error('unable to connect to ethereum node at ' + ethereumUri);
@@ -20,7 +21,7 @@ function sendWithsymkey() {
         pubKey:pubKey,
         // symKeyID:symkeyID,
         ttl:5,
-        payload:'0x10000104',
+        payload:'0x10000102',
         topic:controlTopic,
         powTarget:2.5,
         powTime:2},function (e,r) {
